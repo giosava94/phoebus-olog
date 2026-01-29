@@ -63,6 +63,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -356,8 +357,7 @@ public class LogResource {
         log = cleanMarkup(markup, log);
         addPropertiesFromProviders(log);
         Log newLogEntry = logRepository.save(log);
-        sendToNotifiers(newLogEntry);
-
+        // sendToNotifiers(newLogEntry);
         if (notifyWsClients) {
             webSocketService.sendMessageToClients(new WebSocketMessage(MessageType.NEW_LOG_ENTRY, null));
         }
@@ -429,6 +429,7 @@ public class LogResource {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, TextUtil.ATTACHMENT_DATA_INVALID);
         }
 
+
         List<MultipartFile> multipartFiles = null;
 
         if (files != null) {
@@ -441,6 +442,7 @@ public class LogResource {
 
         // Attachments consistency checked, safe to create log entry
         Log newLogEntry = createLog(clientInfo, markup, false, inReplyTo, logEntry, principal);
+
 
         if (files != null) {
             try {
@@ -455,7 +457,33 @@ public class LogResource {
         Long id = newLogEntry.getId();
         webSocketService.sendMessageToClients(new WebSocketMessage(MessageType.NEW_LOG_ENTRY, null));
 
+        sendToNotifiers(newLogEntry);
+
         logger.log(Level.INFO, () -> MessageFormat.format(TextUtil.LOG_ENTRY_ID_CREATED_FROM, id, clientInfo));
+        // Log updatedLogEntry = newLogEntry;
+
+        // if (files != null) {
+        //     for (MultipartFile multipartFile : multipartFiles) {
+        //         String originalFileName = multipartFile.getOriginalFilename();
+        //         Optional<Attachment> attachment =
+        //                 logEntry.getAttachments().stream()
+        //                         .filter(a -> a.getFilename() != null && a.getFilename().equals(originalFileName)).findFirst();
+        //         if (attachment.isEmpty()) { // Should not happen if client behaves correctly
+        //             logger.log(Level.WARNING, () -> MessageFormat.format(TextUtil.ATTACHMENT_FILE_NOT_MATCHED_META_DATA, originalFileName));
+        //             continue;
+        //         }
+
+        //         updatedLogEntry = saveAttachment(Long.toString(newLogEntry.getId()),
+        //                 multipartFile,
+        //                 originalFileName,
+        //                 attachment.get().getId(),
+        //                 attachment.get().getFileMetadataDescription());
+        //     }
+        // }
+
+        // sendToNotifiers(updatedLogEntry);
+
+        // logger.log(Level.INFO, () -> MessageFormat.format(TextUtil.LOG_ENTRY_ID_CREATED_FROM, newLogEntry.getId(), clientInfo));
 
         return newLogEntry;
     }
@@ -480,6 +508,29 @@ public class LogResource {
         Attachment attachment = new Attachment(id, file, filename, fileMetadataDescription);
         // Store the attachment
         return attachmentRepository.save(attachment);
+
+    // private Log saveAttachment(String logId,
+    //                            MultipartFile file,
+    //                            String filename,
+    //                            String id,
+    //                            String fileMetadataDescription) {
+    //     Optional<Log> foundLog = logRepository.findById(logId);
+    //     if (logRepository.findById(logId).isPresent()) {
+    //         filename = filename == null || filename.isEmpty() ? file.getName() : filename;
+    //         fileMetadataDescription = fileMetadataDescription == null || fileMetadataDescription.isEmpty()
+    //                 ? file.getContentType()
+    //                 : fileMetadataDescription;
+    //         Attachment attachment = new Attachment(id, file, filename, fileMetadataDescription);
+    //         // Store the attachment
+    //         Attachment createdAttachment = attachmentRepository.save(attachment);
+    //         SortedSet<Attachment> existingAttachments = foundLog.get().getAttachments();
+    //         existingAttachments.add(createdAttachment);
+    //         foundLog.get().setAttachments(existingAttachments);
+    //         logRepository.update(foundLog.get());
+    //         return foundLog.get();
+    //     } else {
+    //         throw new ResponseStatusException(HttpStatus.NOT_FOUND, MessageFormat.format(TextUtil.LOG_NOT_RETRIEVED, logId));
+    //     }
     }
 
     /**
