@@ -263,7 +263,6 @@ public class LogResource {
         log = cleanMarkup(markup, log);
         addPropertiesFromProviders(log);
         Log newLogEntry = logRepository.save(log);
-        sendToNotifiers(newLogEntry);
 
         webSocketService.sendMessageToClients(new WebSocketMessage(MessageType.NEW_LOG_ENTRY, null));
 
@@ -307,6 +306,7 @@ public class LogResource {
         }
 
         Log newLogEntry = createLog(clientInfo, markup, inReplyTo, logEntry, principal);
+        Log updatedLogEntry = newLogEntry;
 
         if (files != null) {
             for (int i = 0; i < files.length; i++) {
@@ -318,13 +318,15 @@ public class LogResource {
                     logger.log(Level.WARNING, () -> MessageFormat.format(TextUtil.ATTACHMENT_FILE_NOT_MATCHED_META_DATA, originalFileName));
                     continue;
                 }
-                uploadAttachment(Long.toString(newLogEntry.getId()),
+                updatedLogEntry = uploadAttachment(Long.toString(newLogEntry.getId()),
                         files[i],
                         originalFileName,
                         attachment.get().getId(),
                         attachment.get().getFileMetadataDescription());
             }
         }
+
+        sendToNotifiers(updatedLogEntry);
 
         logger.log(Level.INFO, () -> MessageFormat.format(TextUtil.LOG_ENTRY_ID_CREATED_FROM, newLogEntry.getId(), clientInfo));
 
@@ -362,7 +364,8 @@ public class LogResource {
             SortedSet<Attachment> existingAttachments = log.getAttachments();
             existingAttachments.add(createdAttachement);
             log.setAttachments(existingAttachments);
-            return logRepository.update(log);
+            logRepository.update(log);
+            return log;
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, MessageFormat.format(TextUtil.LOG_NOT_RETRIEVED, logId));
         }
