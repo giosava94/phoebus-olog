@@ -22,7 +22,14 @@ extensions = [
     "sphinxext.rediraffe",
 ]
 
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", ".venv", ".pixi"]
+exclude_patterns = [
+    "_build",
+    "Thumbs.db",
+    ".DS_Store",
+    ".venv",
+    ".pixi",
+    "README.md",
+]
 
 
 # -- Options for HTML output -------------------------------------------------
