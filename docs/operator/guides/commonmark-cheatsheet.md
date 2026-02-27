@@ -151,7 +151,7 @@ text:
 :To get:
   Horizontal rule
 
-  ---
+  <hr>
 
   Note the blank line
   before and after the line
