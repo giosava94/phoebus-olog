@@ -355,37 +355,6 @@ public class LogResource {
 
 
     /**
-     * Add an attachment to log entry identified by logId
-     *
-     * @param logId                   log entry ID
-     * @param file                    the file to be attached
-     * @param filename                name of file
-     * @param id                      UUID for file in mongo
-     * @param fileMetadataDescription file metadata
-     * @return The updated {@link Log}.
-     */
-    @PostMapping("/attachments/{logId}")
-    public Log uploadAttachment(@PathVariable(name = "logId") String logId,
-                                @RequestPart("file") MultipartFile file,
-                                @RequestPart("filename") String filename,
-                                @RequestPart(name = "id", required = false) String id,
-                                @RequestPart(name = "fileMetadataDescription", required = false) String fileMetadataDescription) {
-
-        List<MultipartFile> multipartFiles;
-
-        try {
-            multipartFiles = checkSupportedAttachmentTypes(new MultipartFile[]{file});
-        } catch (IllegalArgumentException exception) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, TextUtil.ATTACHMENT_HEIC_NOT_SUPPORTED);
-        }
-        return saveAttachment(logId,
-                multipartFiles.getFirst(),
-                filename,
-                id,
-                fileMetadataDescription);
-    }
-
-    /**
      * Saves the content of the {@link MultipartFile} to the database.
      *
      * @param logId                   The log id associated with the attachment
