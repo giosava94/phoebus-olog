@@ -52,6 +52,7 @@ developer/references/index
 :maxdepth: 3
 :glob:
 
+contributor/tutorials/index
 contributor/guides/index
 contributor/explanations/index
 contributor/references/index

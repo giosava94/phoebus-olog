@@ -6,5 +6,4 @@
 building
 configuring/index
 deployment/index
-authentication
 ```
