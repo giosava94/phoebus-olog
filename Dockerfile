@@ -15,7 +15,7 @@ FROM eclipse-temurin:25-jdk
 # Run commands as user 'olog'
 RUN useradd -ms /bin/bash olog
 # Use previous maven-build image.
-COPY --from=maven-build /phoebus-olog/target /olog-target
+COPY --from=maven-build /phoebus-olog/service-olog/target /olog-target
 RUN chown olog:olog /olog-target
 USER olog
 WORKDIR /olog-target

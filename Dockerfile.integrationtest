@@ -4,10 +4,10 @@ FROM eclipse-temurin:25-jdk
 RUN useradd -ms /bin/bash olog
 
 # deployment unit
-COPY /target/service-olog*.jar /olog-target/service-olog*.jar
+COPY /service-olog/target/service-olog*.jar /olog-target/service-olog*.jar
 
 # code coverage
-COPY target/jacoco/jacocoagent.jar /olog-target/jacocoagent.jar
+COPY service-olog/target/jacoco/jacocoagent.jar /olog-target/jacocoagent.jar
 
 RUN chown olog:olog /olog-target
 USER olog
